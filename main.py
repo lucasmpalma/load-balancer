@@ -4,8 +4,10 @@
 # Servidore atualizam periodicamente sua carga (0-100);
 # Requisições recebidas devem ser distribuídas aleatoriamente entre os N/2 servidores com menor carga;
 
-# Transação: complexidade
-# Servidor: Carga
+# Referências
+# https://imasters.com.br/back-end/threads-em-python
+# https://thispointer.com/python-how-to-create-a-thread-to-run-a-function-in-parallel/
+# https://techmonger.github.io/55/producer-consumer-python/
 
 from threading import Thread
 from random import randint
@@ -77,16 +79,16 @@ class Server(Thread):
             print(f"Server {self.id} load: {self.load}.")
     
     def add_transaction(self, transaction):
-        self.transactions.put(transaction)
+        self.transactions.put(transaction) #  Balancer adiciona uma Transação à queue de transações do Servidor.
     
     def run(self):
         print(f"Server {self.id} is ready.")
         while(1):
-            if self.transactions.qsize() > 0:
-                t = self.transactions.get()
+            if self.transactions.qsize() > 0: # Servidor verifica se possui transações na sua queue.
+                t = self.transactions.get() # Servidor sequencialmente as transações em sua queue.
                 self.transactions.task_done()
                 self.transactions.join()	
-                t.run(self.id)
+                t.run(self.id) # Servidor começa a execução da Transação.
 
 # ---
 
