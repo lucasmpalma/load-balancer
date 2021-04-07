@@ -1,4 +1,5 @@
 from random import randint
+
 import time
 import sys
 import os
@@ -7,8 +8,10 @@ import pika
 class Client:
     
     def __init__(self, queue_name):
-        print("Creating Client App")
+        print("> Creating Client App.\n")
+        
         self.n_transaction = 0
+        
         self.connection = 0
         self.channel = 0
         self.queue_name = str(queue_name)
@@ -27,8 +30,8 @@ class Client:
             while(1):
                 slept = randint(upper,lower)
                 time.sleep(slept)
-                self.channel.basic_publish(exchange='', routing_key=self.queue_name, body="Transaction " + str(self.n_transaction))
-                print(f"Creating Transaction: {self.n_transaction} (slept {slept}s).")
+                self.channel.basic_publish(exchange='', routing_key=self.queue_name, body="Transaction " + str(self.n_transaction) + "(" + str(randint(3,7)) + ")")
+                print(f"> Client created Transaction: {self.n_transaction} (slept {slept}s).\n")
                 self.n_transaction = self.n_transaction + 1
         except KeyboardInterrupt:
             self.closeMsgQueue()
