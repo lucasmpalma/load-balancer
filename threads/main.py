@@ -1,14 +1,3 @@
-# QUIX
-# Vários servidores replicados;
-# Transações simultânias;
-# Servidore atualizam periodicamente sua carga (0-100);
-# Requisições recebidas devem ser distribuídas aleatoriamente entre os N/2 servidores com menor carga;
-
-# Referências
-# https://imasters.com.br/back-end/threads-em-python
-# https://thispointer.com/python-how-to-create-a-thread-to-run-a-function-in-parallel/
-# https://techmonger.github.io/55/producer-consumer-python/
-
 from threading import Thread
 from random import randint
 import queue
