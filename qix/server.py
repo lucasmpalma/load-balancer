@@ -16,7 +16,7 @@ class Server:
 
         self.lock = RLock()
 
-        self.n_transaction = 0
+        self.transactions = []
         self.connection = 0
         self.channel = 0
 
@@ -37,7 +37,7 @@ class Server:
                 time.sleep(1)
                 transac = 0
                 with self.lock:
-                    transac = self.n_transaction
+                    transac = len(self.transactions)
                 self.channel.basic_publish(exchange='', routing_key=servers_queue, body="S" + str(self.id) + "#" + str(transac))
         except KeyboardInterrupt:
             self.closeMsgQueue()
@@ -62,34 +62,25 @@ class Server:
                 sys.exit(0)
             except SystemExit:
                 os._exit(0)
-    
-    def updateLine(self, value):
-        with self.lock:
-            self.n_transaction += value
-    
-    def getLine(self):
-        with self.lock:
-            return self.n_transaction
 
     def addTransaction(self, ch, method, properties, body):
-        update_thread = Thread(target = self.updateLine, args = (1, ))
-        update_thread.start()
-        update_thread.join()
-
         complexity = int(body.decode('utf-8'))
-        
+        with self.lock:
+            self.transactions.append(complexity)
+        self.total += 1
         ch.basic_ack(delivery_tag = method.delivery_tag)
+        
+    def runTransaction(self):
+        while(1):
+            transaction = 0
+            with self.lock:
+                if len(self.transactions) > 0:
+                    transaction = self.transactions.pop()
+            if transaction != 0: 
+                print(f"--- Server {self.id} started running a Transaction of {transaction}s.")
+                time.sleep(transaction)
+                print(f"--- Server {self.id} ended running a Transaction of {transaction}s | Total: {self.total}")
 
-        time.sleep(complexity)
-        
-        # with self.lock:
-        #     self.n_transaction -= 1
-        #     self.total += 1
-        
-        # ch.basic_ack(delivery_tag = method.delivery_tag)
-        
-        print(f"--- Server {self.id} ended a Transaction of {complexity} seconds | Total: {self.total}.\n")
-        
     def run(self, servers_queue):
         try:
             servers_thread = Thread(target = self.updateBalace, args = (servers_queue, ))
@@ -98,8 +89,12 @@ class Server:
             balancer_thread = Thread(target = self.listenBalancer, args = ("S"+str(self.id), ))
             balancer_thread.start()
 
+            run_thread = Thread(target = self.runTransaction)
+            run_thread.start()
+
             balancer_thread.join()
             servers_thread.join()
+            run_thread.join()
         except KeyboardInterrupt:
             try:
                 sys.exit(0)
