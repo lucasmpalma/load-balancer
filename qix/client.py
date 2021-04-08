@@ -24,13 +24,14 @@ class Client:
     def closeMsgQueue(self):
         self.connection.close()
     
-    def genTransactions(self, upper, lower):
+    def genTransactions(self, upper, lower, limit):
         try:
             self.openMsgQueue()
-            while(1):
-                slept = randint(upper,lower)
+            while(self.n_transaction < limit):
+                # slept = randint(upper,lower)
+                slept = 1
                 time.sleep(slept)
-                self.channel.basic_publish(exchange='', routing_key=self.queue_name, body="Transaction " + str(self.n_transaction) + "(" + str(randint(3,7)) + ")")
+                self.channel.basic_publish(exchange='', routing_key=self.queue_name, body="Transaction " + str(self.n_transaction) + "#" + str(randint(7,13)))
                 print(f"> Client created Transaction: {self.n_transaction} (slept {slept}s).\n")
                 self.n_transaction = self.n_transaction + 1
         except KeyboardInterrupt:

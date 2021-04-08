@@ -24,7 +24,7 @@ def main(n_servers):
             s_process.start()
 
         c = Client(client_queue)
-        c_process = Process(target=c.genTransactions, args=(1,3,))
+        c_process = Process(target=c.genTransactions, args=(1,3,25))
         c_process.start()
 
         for s in server_processes:
