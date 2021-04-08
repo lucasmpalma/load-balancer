@@ -5,6 +5,7 @@ import pika # RabbitMQ
 import sys
 import os
 import random
+import datetime
 
 class Balancer:
 
@@ -13,6 +14,8 @@ class Balancer:
 
         self.trasactions = []
         self.balances = {} # {"S0":0} NUMBER OF TRANSACTIONS FOR EACH SERVER
+        self.capacities = {} # {"S0":0} CAPACITY FOR EACH SERVER
+        self.updates = {} # {"S0":0} TIME OF THE LAST UPDATE FOR EACH SERVER
 
         # --- TO CREATE CONNECTIONS TO SEND TRANSACTIONS TO SERVERS
         self.connection = 0
@@ -69,8 +72,10 @@ class Balancer:
                 os._exit(0)
 
     def updateBalaces(self, ch, method, properties, body):
-        server_msg = body.decode('utf-8').split("#") # "SID#Number"
+        server_msg = body.decode('utf-8').split("#") # "SID#Number#Capacity"
         self.balances[str(server_msg[0])] = int(server_msg[1])
+        self.capacities[str(server_msg[0])] = int(server_msg[2])
+        self.updates[str(server_msg[0])] = datetime.datetime.now()
         
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
@@ -107,7 +112,9 @@ class Balancer:
                     self.openMsgQueue(selected)
                     transaction = ""
 
-                    if len(self.trasactions) > 0:
+                    time_diff = self.updates[selected] - datetime.datetime.now()
+
+                    if len(self.trasactions) > 0 and self.balances[selected] < self.capacities[selected] and time_diff.seconds > 3:
                         transaction = self.trasactions.pop()
                         self.channel.basic_publish(exchange='', routing_key=selected, body=str(transaction))
         except KeyboardInterrupt:

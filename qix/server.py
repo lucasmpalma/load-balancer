@@ -19,6 +19,7 @@ class Server:
 
         self.transactions = []
         self.total = 0 # TOTAL TRANSACTIONS PROCESSED
+        self.capacity = 100
 
         # TO CREATE A CONNECTION WITH BALANCER
         self.connection = 0
@@ -38,9 +39,9 @@ class Server:
         try:
             self.openMsgQueue(servers_queue)
             while(1):
-                time.sleep(1)
+                time.sleep(randint(1,5))
                 transac = len(self.transactions)*20
-                self.channel.basic_publish(exchange='', routing_key=servers_queue, body="S" + str(self.id) + "#" + str(transac))
+                self.channel.basic_publish(exchange='', routing_key=servers_queue, body="S" + str(self.id) + "#" + str(transac) + "#" + str(self.capacity))
         except KeyboardInterrupt:
             self.closeMsgQueue()
             try:
