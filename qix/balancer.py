@@ -91,13 +91,22 @@ class Balancer:
     def sendTransaction(self):
         try:
             while(1):
-                if len(self.balances.keys()) > 0:
+                n_servers = len(self.balances.keys())
+                if n_servers > 0:
                     # --- SERVER SELECTION
-                    selected = str(min(self.balances.items(), key=lambda x: x[1])[0])
+                    
+                    ordered_balances = dict(sorted(self.balances.items(), key=lambda item: item[1]))
+                    candidates = list(ordered_balances)[:int(n_servers/2)]
+                    
+                    selected = 0
+                    if len(candidates) > 0:
+                        selected = random.choice(candidates)
+                    else:
+                        selected = str(min(self.balances.items(), key=lambda x: x[1])[0])
 
                     self.openMsgQueue(selected)
                     transaction = ""
-                    
+
                     if len(self.trasactions) > 0:
                         transaction = self.trasactions.pop()
                         self.channel.basic_publish(exchange='', routing_key=selected, body=str(transaction))

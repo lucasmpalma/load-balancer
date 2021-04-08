@@ -87,9 +87,9 @@ class Server:
                 transaction = self.transactions.pop()
             
             if transaction != 0: 
-                print(f"--- Server {self.id} started running a Transaction of {transaction}s.")
+                print(f"--- Server {self.id} started running a Transaction of {transaction}s.\n")
                 time.sleep(transaction)
-                print(f"--- Server {self.id} ended running a Transaction of {transaction}s | Total: {self.total}")
+                print(f"--- Server {self.id} ended running a Transaction of {transaction}s | Total Executed: {self.total}.\n")
     
     # --- RUN TRANSACTIONS ---
 

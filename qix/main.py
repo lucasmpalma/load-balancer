@@ -31,7 +31,7 @@ def main(n_servers, n_transactions):
 
         # --- START CLIENT PROCESS
         c = Client(client_queue)
-        c_process = Process(target=c.genTransactions, args=(1,3,n_transactions))
+        c_process = Process(target=c.genTransactions, args=(1,2,n_transactions))
         c_process.start()
 
         # --- JOIN PROCESSES
@@ -51,4 +51,4 @@ def main(n_servers, n_transactions):
 
 # ---
 
-main(5,50)
+main(4,50)
