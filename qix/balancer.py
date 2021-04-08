@@ -98,18 +98,22 @@ class Balancer:
             while(1):
                 n_servers = len(self.balances.keys())
                 if n_servers > 0:
-                    # --- SERVER SELECTION
+                    # --- SERVER SELECTION ---
                     
                     ordered_balances = dict(sorted(self.balances.items(), key=lambda item: item[1]))
-                    candidates = list(ordered_balances)[:int(n_servers/2)]
+                    candidates = list(ordered_balances.keys())[:int(n_servers/2)]
+                    candidates_balances = list(ordered_balances.values())[:int(n_servers/2)]
                     
                     selected = 0
                     if len(candidates) > 0:
-                        selected = random.choice(candidates)
+                        selected = random.choices(candidates, weights=reversed(candidates_balances), k=1)[0]
                     else:
                         selected = str(min(self.balances.items(), key=lambda x: x[1])[0])
 
                     self.openMsgQueue(selected)
+                    
+                    # --- SERVER SELECTION ---
+                    
                     transaction = ""
 
                     time_diff = self.updates[selected] - datetime.datetime.now()

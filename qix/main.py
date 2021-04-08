@@ -51,4 +51,4 @@ def main(n_servers, n_transactions):
 
 # ---
 
-main(4,50)
+main(5,50)
